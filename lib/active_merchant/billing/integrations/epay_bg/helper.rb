@@ -46,7 +46,7 @@ module ActiveMerchant #:nodoc:
               'AMOUNT'   => @fields['AMOUNT'],
               'EXP_TIME' => @fields['EXP_TIME'] || '01.08.2020',
             }
-            if @fields['MIN_OR_EMAIL'] =~ /^\d+$/
+            if @fields['MIN_OR_EMAIL'] =~ /^\w\d+$/
               data['MIN'] = @fields['MIN_OR_EMAIL']
             else
               data['EMAIL'] = @fields['MIN_OR_EMAIL']
