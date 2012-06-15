@@ -11,8 +11,12 @@ module ActiveMerchant #:nodoc:
           def self.bulk_acknowledged?(raw, secret)
             params = parse_raw_params(raw)
 
+            if params['ENCODED'].nil? || params['CHECKSUM'].nil?
+              raise ArgumentError, "No parameters or wrong format given"
+            end
+
             checksum = OpenSSL::HMAC.hexdigest('sha1', secret, params['ENCODED'])
-            return checksum == params['CHECKSUM']
+            return checksum.upcase == params['CHECKSUM'].upcase
           end
 
           def self.get_bulk(raw)
@@ -30,7 +34,7 @@ module ActiveMerchant #:nodoc:
             status = 'ERR' unless %w(OK NO ERR).include? status
 
             response = "INVOICE=#{item_id}:STATUS=#{status}"
-            response += "=#{error.to_s}" if error
+            response += ":ERR=#{error.to_s}" if error
             response
           end
 
@@ -95,9 +99,11 @@ module ActiveMerchant #:nodoc:
           private
           def self.parse_raw_params(raw)
             params = {}
-            raw.split('&').each do |param|
+            raw.nil? or raw.split('&').each do |param|
               key, value = *param.scan( %r{^([A-Za-z0-9_.]+)\=(.*)$} ).flatten
-              params[key] = CGI.unescape(value)
+              if !key.blank? && !value.blank?
+                params[key] = CGI.unescape(value)
+              end
             end
             params
           end
