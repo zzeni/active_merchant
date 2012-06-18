@@ -102,7 +102,7 @@ module ActiveMerchant #:nodoc:
             raw.nil? or raw.split('&').each do |param|
               key, value = *param.scan( %r{^([A-Za-z0-9_.]+)\=(.*)$} ).flatten
               if !key.blank? && !value.blank?
-                params[key] = CGI.unescape(value)
+                params[key.upcase] = CGI.unescape(value)
               end
             end
             params
