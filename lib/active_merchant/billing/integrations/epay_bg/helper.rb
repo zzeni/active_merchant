@@ -1,6 +1,8 @@
 require 'base64'
 require 'openssl'
 require 'date'
+require 'uri'
+require 'net/http'
 
 module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
@@ -25,6 +27,7 @@ module ActiveMerchant #:nodoc:
                 'You need to provide the secret key as the option :credential2'
             end
             @secret = options[:credential2]
+            @ssl_strict = ssl_strict
           end
 
           def expiration_date(value)
@@ -73,6 +76,39 @@ module ActiveMerchant #:nodoc:
             fields['URL_OK']     = @fields['URL_OK'] if @fields['URL_OK']
             fields['URL_CANCEL'] = @fields['URL_CANCEL'] if @fields['URL_CANCEL']
             fields
+          end
+
+          def issue_easypay_token
+            response = request_easypay_token
+            parse_easypay_token_response(response)
+          end
+
+          def request_easypay_token
+            params = {
+              'ENCODED'  => encoded,
+              'CHECKSUM' => checksum,
+            }
+            uri = URI.parse(easypay_token_url)
+            uri.query = URI.encode_www_form(params)
+
+            http = Net::HTTP.new(uri.host, uri.port)
+            http.use_ssl = true
+            http.verify_mode = OpenSSL::SSL::VERIFY_NONE unless @ssl_strict
+
+            request = Net::HTTP::Get.new(uri.path + (uri.query.empty? ? '' : "?#{uri.query}"))
+            response = http.start {|http| http.request(request) }
+
+          end
+
+          def parse_easypay_token_response(response)
+            if response kind_of?(Net::HTTPSuccess)
+              result = response.body.encode('UTF-8', 'cp1251')
+              match_data = result.match(/^IDN=(\d{10})/) and return match_data[1]
+
+              raise StandardError, "Response doesn't contain token, or has wrong format: #{result}"
+            end
+
+            raise StandardError, "Request for Easypay token failed: #{response.header}"
           end
         end
       end
