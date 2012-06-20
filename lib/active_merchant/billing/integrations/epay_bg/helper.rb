@@ -97,11 +97,10 @@ module ActiveMerchant #:nodoc:
 
             request = Net::HTTP::Get.new(uri.path + (uri.query.empty? ? '' : "?#{uri.query}"))
             response = http.start {|http| http.request(request) }
-
           end
 
           def parse_easypay_token_response(response)
-            if response kind_of?(Net::HTTPSuccess)
+            if response.kind_of?(Net::HTTPSuccess)
               result = response.body.encode('UTF-8', 'cp1251')
               match_data = result.match(/^IDN=(\d{10})/) and return match_data[1]
 
@@ -109,6 +108,18 @@ module ActiveMerchant #:nodoc:
             end
 
             raise StandardError, "Request for Easypay token failed: #{response.header}"
+          end
+
+          def easypay_token_url
+            if ActiveMerchant::Billing::Base.integration_mode == :production
+              'https://www.epay.bg/ezp/reg_bill.cgi'
+            else
+              'https://devep2.datamax.bg/ep2/epay2_demo/ezp/reg_bill.cgi'
+            end
+          end
+
+          def ssl_strict
+            ActiveMerchant::Billing::Base.integration_mode == :production
           end
         end
       end
