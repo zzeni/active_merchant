@@ -39,6 +39,10 @@ module ActiveMerchant #:nodoc:
           rand(36**length).to_s(36)
         end
 
+        def merchant_credentials_file
+          @alias + '.xml'
+        end
+
         def read_zip
           create_readable_zip
 
@@ -48,7 +52,7 @@ module ActiveMerchant #:nodoc:
           zip_file = Zip::ZipFile.open(@readable_file.path)
 
           begin
-            zip_entry = zip_file.get_entry(@alias)
+            zip_entry = zip_file.get_entry(merchant_credentials_file)
           ensure
             zip_file.close
           end

@@ -8,8 +8,8 @@ module ActiveMerchant #:nodoc:
     class E24PaymentPipeGateway < Gateway
       attr_reader :settings
       attr_reader :response
-      attr_accessor :id
-      attr_accessor :page
+      attr_accessor :payment_id
+      attr_accessor :service_url
 
       def initialize(settings = {})
         @settings = {}.merge!(values_to_string(settings))
@@ -45,7 +45,7 @@ module ActiveMerchant #:nodoc:
 
         unless match.nil?
           @payment_id = match.pre_match
-          @page = match.post_match
+          @service_url = match.post_match
         end
       end
 
