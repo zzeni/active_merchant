@@ -1,6 +1,8 @@
 source :rubygems
 gemspec
 
+gem 'rubyzip', '>= 0.9.4'
+
 group :test do
   gem 'json-jruby', :platforms => :jruby
   gem 'jruby-openssl', :platforms => :jruby
