@@ -5,6 +5,24 @@ module ActiveMerchant #:nodoc:
   module Billing #:nodoc:
     module Integrations #:nodoc:
       module EpayBg
+
+        #Sample notification by ePay.bg (source: https://www.epay.bg/img/x/readme_web.pdf):
+        #
+        #  INVOICE=123456:STATUS=PAID:PAY_TIME=YYYYMMDDhhmmss:STAN=[6 numbers]:BCODE=[6 numbers/letters]
+        #  INVOICE=123457:STATUS=DENIED
+        #  INVOICE=123457:STATUS=EXPIRED
+        #
+        #  (*) if payment includes discount (e.g. with card BIN: cardbin2 and amount: amount1), then the notification would be:
+        #  INVOICE=123456:STATUS=PAID:PAY_TIME=YYYYMMDDhhmmss:STAN=[6 numbers]:BCODE=[6 numbers/letters]:AMOUNT=amount1:BIN=cardbin2
+        #
+        #  STATUS=[PAID | DENIED | EXPIRED] - Paid | Denied | Expired
+        #  PAY_TIME                         - date/hour/sec of payment
+        #  STAN                             - transaction number
+        #  BCODE                            - authorization code by BORIKA
+        #
+        #  AMOUNT                           - amount paid, given ONLY when discount
+        #  BIN                              - card BIN, given ONLY when discount
+
         class Notification < ActiveMerchant::Billing::Integrations::Notification
 
           # Whole bulk must be acknowledged manually
