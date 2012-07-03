@@ -98,11 +98,16 @@ module ActiveMerchant #:nodoc:
           #   CANCELED        user cancelled payment
           #
           def result
-            error.blank? ? params['result'] : 'ERROR'
+            if error.blank?
+              authorized? ? params['result'] : 'NOT_AUTHORIZED'
+            else
+              'ERROR'
+            end
           end
 
           def payment_info
-            error.blank? ? "RESULT: #{response_code} - #{result}." : "ERROR: #{error} - #{error_message}"
+            info = "RESULT: #{response_code} - #{result}(Original: #{params['result']})."
+            info << "ERROR: #{error} - #{error_message}" unless error.blank?
           end
 
           def status
@@ -114,6 +119,10 @@ module ActiveMerchant #:nodoc:
             else
               'Error'
             end
+          end
+
+          def authorized?
+            authorization_code.to_i != 0
           end
 
           def acknowledge
