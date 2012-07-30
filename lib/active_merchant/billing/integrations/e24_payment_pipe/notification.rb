@@ -122,7 +122,7 @@ module ActiveMerchant #:nodoc:
           end
 
           def authorized?
-            authorization_code.to_i != 0
+            authorization_code.present? && authorization_code.to_s != '0'
           end
 
           def acknowledge
